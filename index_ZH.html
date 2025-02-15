@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>PDF重複列印</title>
+        <style>
+            body {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                margin: 0;
+                background: #212529;
+                color: white;
+                text-align: center;
+                font-family: sans-serif;
+                overflow: hidden;
+            }
+
+            input,
+            button {
+                margin: 5px;
+                padding: 5px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
+
+            button {
+                cursor: pointer;
+            }
+
+            #select, #restart {
+                width: 50vw;
+                font-size: larger;
+                background: none;
+                border: 1px solid white;
+                color: white;
+                transition: 0.2s;
+            }
+
+            #select:hover, #restart:hover {
+                background: white;
+                color: #212529;
+            }
+
+            #upload {
+                width: 50vw;
+                font-size: larger;
+                background: rgb(0, 171, 0);
+                border: 1px solid white;
+                color: white;
+                transition: 0.2s;
+            }
+
+            #upload:hover {
+                background: white;
+                color: rgb(0, 171, 0);
+            }
+
+            #upload:active {
+                background: rgb(0, 77, 0);
+                color: white
+            }
+
+            #page {
+                width: 20vw;
+                font-size: 60px;
+                background: none;
+                border: 1px solid white;
+                color: white;
+                text-align: center;
+            }
+
+            #multiply {
+                width: 20vw;
+                font-size: larger;
+                background: rgb(0, 171, 0);
+                border: 1px solid white;
+                color: white;
+                transition: 0.2s;
+            }
+
+            #multiply:hover {
+                background: white;
+                color: rgb(0, 171, 0);
+            }
+
+            #multiply:active {
+                background: rgb(0, 77, 0);
+                color: white
+            }
+
+            #back {
+                width: 25vw;
+                font-size: larger;
+                background: none;
+                border: 1px solid white;
+                color: white;
+                transition: 0.2s;
+            }
+
+            #back:hover {
+                background: white;
+                color: #212529;
+            }
+
+            #next {
+                width: 25vw;
+                font-size: larger;
+                background: rgb(0, 171, 0);
+                border: 1px solid white;
+                color: white;
+                transition: 0.2s;
+            }
+
+            #next:hover {
+                background: white;
+                color: rgb(0, 171, 0);
+            }
+
+            #next:active {
+                background: rgb(0, 77, 0);
+                color: white
+            }
+
+            @keyframes rotating
+                {
+                from {
+                    -webkit-transform: rotate(0deg);
+                    -o-transform: rotate(0deg);
+                    transform: rotate(0deg);
+                }
+
+                to {
+                    -webkit-transform: rotate(360deg);
+                    -o-transform: rotate(360deg);
+                    transform: rotate(360deg);
+                }
+            }
+            .langButton {
+                width: 48%;
+                height: 100%;
+                border: none;
+                background: none;
+                font-size: 25px;
+                color: white;
+                border-radius: 0;
+                transition: 0.2s;
+            }
+            .selected {
+                background: rgb(207, 236, 250);
+                color: #212529;
+                font-weight: bolder;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="step1">
+            <h1>PDF重複列印</h1>
+            <img src="PDF_file_icon.svg" alt="PDF file icon" width="100">
+            <br>
+            <button id="select" onclick="select()">點此選擇PDF</button>
+            <input type="file" id="file" name="file" accept=".pdf" onchange="load()" style="display: none;">
+            <br>
+            <button id="upload" onclick="upload()" style="display: none;">下一步</button>
+        </div>
+        <div id="step2" style="display: none;">
+            <button style="font-size: 30px;color: white;background: none;border: none;" onclick="next('step1')">
+                <img src="back.svg" alt="Back" width="30">
+                &nbsp;上一步
+            </button>
+            <br><br>
+            <h1>選擇份數</h1>
+            <img src="copy.svg" alt="PDF file icon" width="100">
+            <br>
+            <input type="number" id="page" name="page" placeholder="Pages" value="1" min="1">
+            <br>
+            <button id="multiply" onclick="confirm()">下一步</button>
+        </div>
+        <div id="confirm" style="text-align: left;display: none;">
+            <p>
+            <h1 style="font-size: 60px;">確認列印資訊</h1>
+            <span style="font-size: 30px;">檔案名稱：<strong id="file_name">week2.pdf</strong></span>
+            <br>
+            <span style="font-size: 30px;">份數：<strong style="color: red" id="copies">114514</strong></span>
+            <br>
+            <br>
+            <button id="back" onclick="next('step2')">返回</button>
+            <button id="next" onclick="multiply()">繼續</button>
+            </p>
+        </div>
+        <div id="loading" style="display: none;">
+            <img src="loading.svg" alt="PDF file icon" width="100" style="animation: rotating 2s linear infinite">
+            <h1>請稍候...</h1>
+        </div>
+        <div id="done" style="display: none;">
+            <h1>快完成了...</h1>
+            <img src="done.svg" alt="PDF file icon" width="100">
+            <br>
+            <p id="file_check"></p>
+            <br>
+            <p>接下來請依照 <a href="https://oper.cc.ntu.edu.tw/pcroom.html#:~:text=to%20use%20WebPrint-,%E5%88%97%E5%8D%B0Print%20/%2001,-%E8%AB%8B%E5%85%88%E4%BD%BF%E7%94%A8myNTU">這個連結</a>繼續列印</p>
+            <br>
+            <button id="restart" onclick="restart()">處理其他檔案</button>
+        </div>
+        <div id="lang" style="position: absolute;bottom: 0;width: 100vw;background-color: rgb(62, 62, 62);height: 50px;">
+            <button id="ZH" class="langButton selected" onclick="switchLang('ZH')">繁體中文</button>
+            <button id="EN" class="langButton"  onclick="switchLang('EN')">English</button>
+        </div>
+        <script src="renderer.js"></script>
+    </body>
+
+</html>
